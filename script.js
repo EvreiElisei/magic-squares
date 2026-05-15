@@ -8,56 +8,133 @@ const sizing = {
 	height: 20,
 };
 
-const color = ["#113093", "#2858E3", "#B73EC2", "#741E47", "#B32B35"];
+const colors = ["#113093", "#2858E3", "#B73EC2", "#741E47", "#B32B35"];
 const normalColor = "#1d1d1d";
 const boxShadowColor = "#000";
-const colorLength = color.length;
-const container = document.querySelector(selectors.container);
-const square = `<div class="square" data-js-square></div>`;
-const gridTemplate = `repeat(${sizing.width}, 1fr)`;
-const timeouts = new Map();
+const colorLength = colors.length;
+const resetDelay = 3000;
+class ColorBoard {
+	constructor(selectors, sizing, colors, normalColor, resetDelay = 3000) {
+		this.selectors = selectors;
+		this.sizing = sizing;
+		this.colors = colors;
+		this.normalColor = normalColor;
+		this.resetDelay = resetDelay;
+		this.timeouts = new Map();
+		this.container = null;
+		this.squares = [];
 
-function getRandomColor(length) {
-	const randomColorIndex = Math.floor(Math.random() * length);
-	return color[randomColorIndex];
-}
+		this.init();
+	}
 
-function createBoard(sizing) {
-	container.style.gridTemplateColumns = gridTemplate;
-	let board = "";
-	for (let y = 0; y < sizing.height; y++) {
-		for (let x = 0; x < sizing.width; x++) {
-			board += square;
+	init() {
+		this.container = document.querySelector(this.selectors.container);
+		if (!this.container) {
+			console.error("Container not found!");
+			return;
+		}
+
+		this.createBoard();
+		this.attachEvents();
+	}
+
+	getRandomColorFromArray() {
+		const randomIndex = Math.floor(Math.random() * this.colors.length);
+		return this.colors[randomIndex];
+	}
+
+	createBoard() {
+		const width = this.sizing.width;
+		const height = this.sizing.height;
+		this.container.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+
+		const totalSquares = height * width;
+		const squaresHTML = Array(totalSquares)
+			.fill(`<div class="square" data-js-square></div>`)
+			.join("");
+
+		this.container.innerHTML = squaresHTML;
+		this.squares = Array.from(this.container.querySelectorAll(this.selectors.square));
+	}
+
+	getNormalColor(square) {
+		square.style.backgroundColor = this.normalColor;
+		square.style.boxShadow = `0 0 2px ${this.normalColor}`;
+	}
+
+	handleMouseEnter(square) {
+		if (this.timeouts.has(square)) {
+			clearTimeout(this.timeouts.get(square));
+		}
+		const color = this.getRandomColorFromArray();
+		square.style.backgroundColor = color;
+		square.style.boxShadow = `0 0 2px ${color}, 0 0 10px ${color}`;
+
+		const timeoutId = setTimeout(() => {
+			this.getNormalColor(square);
+			this.timeouts.delete(square);
+		}, this.resetDelay);
+
+		this.timeouts.set(square, timeoutId);
+	}
+
+	attachEvents() {
+		this.squares = document.querySelectorAll(this.selectors.square);
+
+		this.squares.forEach((square) => {
+			square.addEventListener("mouseenter", () => this.handleMouseEnter(square));
+		});
+	}
+
+	clearSquareTimer(square) {
+		if (this.timeouts.has(square)) {
+			clearTimeout(this.timeouts.get(square));
+			this.timeouts.delete(square);
 		}
 	}
-	container.innerHTML = board;
-}
 
-createBoard(sizing);
-const squares = document.querySelectorAll(selectors.square);
-
-function removeColor(square) {
-	square.style.backgroundColor = normalColor;
-	square.style.boxShadow = `0 0 2px ${boxShadowColor}`;
-}
-
-function setColor() {
-	const color = getRandomColor(colorLength);
-	const square = this;
-	if (timeouts.has(square)) {
-		clearTimeout(timeouts.get(square));
+	clearAllTimers() {
+		this.timeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+		this.timeouts.clear();
 	}
-	square.style.backgroundColor = color;
-	square.style.boxShadow = `0 0 2px ${color}, 0 0 10px ${color}`;
-	const timeoutId = setTimeout(() => {
-		removeColor(square);
-		timeouts.delete(square);
-	}, 3000);
-	timeouts.set(square, timeoutId);
+
+	resetBoard() {
+		// ??????
+		this.clearAllTimers();
+
+		this.squares.forEach((square) => {
+			this.getNormalColor(square);
+		});
+	}
+
+	resizeBoard(newWidth, newHeight) {
+		// сделать использование через интерфейс
+		this.sizing.width = newWidth;
+		this.sizing.height = newHeight;
+
+		this.clearAllTimers();
+
+		this.createBoard();
+		this.attachEvents();
+	}
+
+	destroyBoard() {
+		this.clearAllTimers();
+
+		this.container.removeEventListener("mouseenter", () => this.handleContainerMouseEnter);
+		this.handleContainerMouseEnter = null;
+		this.container.innerHTML = "";
+		this.container = null;
+		this.timeouts.clear();
+	}
+
+	addColor(color) {
+		this.colors.push(color);
+	}
+
+	setResetDelay(delay) {
+		this.resetDelay = delay;
+	}
 }
 
-squares.forEach((square) => {
-	square.addEventListener("mouseenter", setColor);
-});
-
-//
+const board = new ColorBoard(selectors, sizing, colors, normalColor, resetDelay);

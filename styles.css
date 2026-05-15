@@ -25,6 +25,7 @@ body {
 	height: 16px;
 	background: #1d1d1d;
 	box-shadow: 0 0 2px #000;
-	transition: background 2s ease;
-	transition: box-shadow 1s ease;
+	transition:
+		background 2s ease,
+		box-shadow 1s ease;
 }
