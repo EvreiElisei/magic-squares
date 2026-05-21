@@ -1,6 +1,7 @@
 const selectors = {
 	container: "[data-js-container]",
 	square: "[data-js-square]",
+	inner: "data-js-inner",
 };
 
 const sizing = {
@@ -14,7 +15,7 @@ const boxShadowColor = "#000";
 const colorLength = colors.length;
 const resetDelay = 3000;
 class ColorBoard {
-	constructor(selectors, sizing, colors, normalColor, resetDelay = 3000) {
+	constructor(selectors, sizing, colors, normalColor, boxShadowColor, resetDelay = 3000) {
 		this.selectors = selectors;
 		this.sizing = sizing;
 		this.colors = colors;
@@ -22,12 +23,15 @@ class ColorBoard {
 		this.resetDelay = resetDelay;
 		this.timeouts = new Map();
 		this.container = null;
+		this.inner = document.createElement("div");
 		this.squares = [];
-
+		this.boxShadowColor = boxShadowColor;
 		this.init();
 	}
 
 	init() {
+		this.inner.className = "inner";
+		this.inner.setAttribute(selectors.inner, "");
 		this.container = document.querySelector(this.selectors.container);
 		if (!this.container) {
 			console.error("Container not found!");
@@ -46,20 +50,21 @@ class ColorBoard {
 	createBoard() {
 		const width = this.sizing.width;
 		const height = this.sizing.height;
-		this.container.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+		this.inner.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
 
 		const totalSquares = height * width;
 		const squaresHTML = Array(totalSquares)
 			.fill(`<div class="square" data-js-square></div>`)
 			.join("");
 
-		this.container.innerHTML = squaresHTML;
+		this.inner.innerHTML = squaresHTML;
+		this.container.appendChild(this.inner);
 		this.squares = Array.from(this.container.querySelectorAll(this.selectors.square));
 	}
 
 	getNormalColor(square) {
 		square.style.backgroundColor = this.normalColor;
-		square.style.boxShadow = `0 0 2px ${this.normalColor}`;
+		square.style.boxShadow = `0 0 2px ${this.boxShadowColor}`;
 	}
 
 	handleMouseEnter(square) {
@@ -137,4 +142,5 @@ class ColorBoard {
 	}
 }
 
-const board = new ColorBoard(selectors, sizing, colors, normalColor, resetDelay);
+const board = new ColorBoard(selectors, sizing, colors, normalColor, boxShadowColor, resetDelay);
+const board1 = new ColorBoard(selectors, sizing, colors, normalColor, boxShadowColor, resetDelay);

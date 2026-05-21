@@ -13,11 +13,8 @@ body {
 }
 
 .container {
-	display: grid;
-	justify-content: center;
-	align-items: center;
-	max-width: 400px;
-	gap: 2px;
+	display: flex;
+	gap: 15px;
 }
 
 .square {
@@ -28,4 +25,11 @@ body {
 	transition:
 		background 2s ease,
 		box-shadow 1s ease;
+}
+.inner {
+	display: grid;
+	justify-content: center;
+	align-items: center;
+	max-width: 400px;
+	gap: 2px;
 }
