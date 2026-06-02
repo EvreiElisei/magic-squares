@@ -95,27 +95,30 @@ class ColorBoard {
 		<h2>🎮 Доска #${this.id}</h2>
       
     	 <div class="control-group">
-        <label>Размер сетки:</label>
-        <input type="number" data-control="width" min="1" max="50" value="${this.sizing.width}">
+        <label for="${this.selectors.ui.widthInput}">Размер сетки:</label>
+        <input id="${this.selectors.ui.widthInput}" type="number" ${this.selectors.ui.widthInput} min="1" max="50" value="${this.sizing.width}">
         <span>×</span>
-        <input type="number" data-control="height" min="1" max="50" value="${this.sizing.height}">
+        <input id="${this.selectors.ui.heightInput}" type="number" ${this.selectors.ui.heightInput} min="1" max="50" value="${this.sizing.height}">
         <button data-action="resize">Изменить</button>
       </div>
 
       <div class="control-group">
-        <label>Добавить цвет:</label>
-        <input type="color" data-control="new-color" value="#FF6B6B">
+        <label for="${this.selectors.ui.newColorInput}">Добавить цвет:</label>
+        <input id="${this.selectors.ui.newColorInput}" type="color" ${this.selectors.ui.newColorInput} value="#FF6B6B">
         <button data-action="add-color">➕ Добавить</button>
       </div>
 
       <div class="control-group">
-        <label>Палитра:</label>
-        <ul class="${STYLE_CLASSES.colorList}" data-component="color-list"></ul>
+			 <div class="control-group-inner">
+			 	<h3>Палитра:</h3>
+        <ul  class="${STYLE_CLASSES.colorList}" ${this.selectors.ui.colorList}></ul>
+			 </div>
+        
       </div>
 
       <div class="control-group">
-        <label>Задержка сброса:</label>
-        <input type="range" data-control='delay-range' min="500" max="5000" step="100" value="${this.resetDelay}">
+        <label for="${this.selectors.ui.delayRange}">Задержка сброса:</label>
+        <input id="${this.selectors.ui.delayRange}" type="range" ${this.selectors.ui.delayRange} min="500" max="5000" step="100" value="${this.resetDelay}">
         <span data-control="delay-value">${this.resetDelay}ms</span>
       </div>
 
