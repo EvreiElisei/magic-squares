@@ -230,6 +230,11 @@ body {
 	flex-direction: column;
 	gap: 10px;
 }
+.control-group {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
 .color-list {
 	display: flex;
 	gap: 15px;
@@ -241,7 +246,20 @@ body {
 	align-items: center;
 	justify-content: center;
 }
-.color-item-box {
-	width: 20px;
-	aspect-ratio: 1/1;
+
+input[type="color"] {
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	padding: 0;
+	border: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+	border: none;
 }

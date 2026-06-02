@@ -22,6 +22,8 @@ class ColorBoard {
 		this.selectors = selectors;
 		this.sizing = { ...sizing };
 		this.colors = [...colors];
+		this.defaultColors = [...colors];
+		this.defaultSizing = { ...sizing };
 		this.normalColor = normalColor;
 		this.resetDelay = resetDelay;
 		this.timeouts = new Map();
@@ -62,9 +64,9 @@ class ColorBoard {
 			
 			<div class="control-group">
 				<label>Размер сетки:</label>
-				<input type="number" class="width-input" min="1" max="30" value="${this.sizing.width}">
+				<input type="number" class="width-input" min="1" max="50" value="${this.sizing.width}">
 				<span>×</span>
-				<input type="number" class="height-input" min="1" max="30" value="${this.sizing.height}">
+				<input type="number" class="height-input" min="1" max="50" value="${this.sizing.height}">
 				<button class="resize-btn">Изменить</button>
 			</div>
 
@@ -83,7 +85,7 @@ class ColorBoard {
 
 			<div class="control-group">
 				<label>Задержка сброса:</label>
-				<input type="range" class="delay-slider" min="500" max="5000" step="100" value="${this.resetDelay}">
+				<input type="range" class="delay-range" min="500" max="5000" step="100" value="${this.resetDelay}">
 				<span class="delay-value">${this.resetDelay}ms</span>
 			</div>
 
@@ -92,10 +94,7 @@ class ColorBoard {
 				<button class="reset-colors-btn">🎨 Сбросить цвета</button>
 			</div>
 
-			<div class="info">
-				Количество цветов: <span class="color-count">${this.colors.length}</span> цветов | 
-				⏱️ Задержка: <span class="delay-display">${this.resetDelay}</span>ms
-			</div>
+			
 		`;
 		panelContainer.appendChild(this.controlPanel);
 		this.attachControlEvents();
@@ -119,12 +118,27 @@ class ColorBoard {
 
 		const addColorBtn = this.controlPanel.querySelector(".add-color-btn");
 		const newColorInput = this.controlPanel.querySelector(".new-color");
+		const resetBoardBtn = this.controlPanel.querySelector(".reset-board-btn");
+		const resetColorsBtn = this.controlPanel.querySelector(".reset-colors-btn");
+		const delayRange = this.controlPanel.querySelector(".delay-range");
+		const delayValue = this.controlPanel.querySelector(".delay-value");
 
+		delayRange.addEventListener("input", (event) => {
+			const newDelay = parseInt(event.target.value);
+			delayValue.textContent = `${newDelay}ms`;
+			this.setResetDelay(newDelay);
+		});
 		addColorBtn.addEventListener("click", () => {
 			const newColor = newColorInput.value;
 			this.addColor(newColor);
 			this.updateColorList();
-			//this.updateInfo()
+		});
+
+		resetBoardBtn.addEventListener("click", () => {
+			this.resizeBoard(this.defaultSizing.width, this.defaultSizing.height);
+		});
+		resetColorsBtn.addEventListener("click", () => {
+			this.resetColors();
 		});
 	}
 
@@ -139,20 +153,36 @@ class ColorBoard {
 		this.colors.forEach((color, index) => {
 			const colorItem = document.createElement("li");
 			colorItem.classList = "color-item";
-			colorItem.innerHTML = `
 
-				<input class="color-item-box" type="color" value="${color}" >
-				<h3 class="color-item-title">${color}</h3>
-			`;
+			const input = document.createElement("input");
+			input.classList = "color-item-box";
+			input.type = "color";
+			input.value = color;
+			input.id = `color-input-${index}`;
 
+			const label = document.createElement("label");
+			label.classList = "color-item-label";
+			label.textContent = color;
+			label.for = `color-iput-${index}`;
+
+			input.addEventListener("change", (event) => {
+				this.colors[index] = event.target.value;
+				label.textContent = event.target.value;
+			});
+
+			colorItem.addEventListener("dblclick", (event) => {
+				if (this.colors.length > 1) {
+					this.colors.splice(index, 1);
+					this.updateColorList();
+				} else {
+					alert("Нельзя удалить последний цвет!");
+				}
+			});
+
+			colorItem.appendChild(input);
+			colorItem.appendChild(label);
 			colorList.appendChild(colorItem);
 		});
-		//const colorItems = document.querySelectorAll(".color-item-box");
-		//colorItems.forEach((item, index) => {
-		//	item.addEventListener("input", (event) => {
-		//		console.log(event.target.value);
-		//	});
-		//});
 	}
 
 	getRandomColorFromArray() {
@@ -219,15 +249,6 @@ class ColorBoard {
 		this.timeouts.clear();
 	}
 
-	resetBoard() {
-		// ??????
-		this.clearAllTimers();
-
-		this.squares.forEach((square) => {
-			this.getNormalColor(square);
-		});
-	}
-
 	resizeBoard(newWidth, newHeight) {
 		// сделать использование через интерфейс
 		this.sizing.width = newWidth;
@@ -254,6 +275,12 @@ class ColorBoard {
 
 	setResetDelay(delay) {
 		this.resetDelay = delay;
+	}
+
+	resetColors() {
+		this.colors = [...this.defaultColors];
+		console.log(this.defaultColors);
+		this.updateColorList();
 	}
 }
 
